@@ -1,0 +1,37 @@
+import heapq
+
+MyGraph = {
+    'S': {'A': 3, 'C': 2, 'D': 2},
+    'D': {'B': 3, 'G': 8},
+    'B': {'E': 2},
+    'E': {'G': 2},
+    'C': {'F': 1},
+    'F': {'E': 0, 'G': 4},
+}
+
+def UCS(start, goal):
+    frontier = []
+    heapq.heappush(frontier, (0, [start]))  # (cost, path)
+    visited = set()
+
+    while frontier:
+        cost, path = heapq.heappop(frontier)
+        node = path[-1]
+
+        if node in visited:
+            continue
+        visited.add(node)
+
+        if node == goal:
+            print("Total cost:", cost)
+            return path
+
+        for neighbor in MyGraph.get(node, {}):
+            if neighbor not in visited:
+                new_cost = cost + MyGraph[node][neighbor]
+                new_path = path + [neighbor]
+                heapq.heappush(frontier, (new_cost, new_path))
+
+    return None
+
+print("Path:", UCS('S', 'G'))	

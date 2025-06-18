@@ -1,0 +1,70 @@
+graph = {
+    "Door":   {"Drink": 2, "Vegs": 3, "Fruits": 5},
+    "Drink":  {"Cake": 1, "Coke": 4},
+    "Vegs":   {"Carrot": 2},
+    "Fruits": {"Apple": 1},
+    "Coke":   {"Papers": 2},
+    "Carrot": {"Water": 1},
+    "Apple":  {"Water": 2},
+    "Cake":   {},
+    "Papers": {},
+    "Water":  {}
+}
+
+H = {
+    "Door": 12,
+    "Drink": 11,
+    "Cake": 9,
+    "Coke": 8,
+    "Papers": 7,
+    "Vegs": 10,
+    "Carrot": 6,
+    "Fruits": 9,
+    "Apple": 5,
+    "Water": 0
+}
+
+def gbfs_multiple_items(start, items_to_find):
+    path = [start]
+    frontier = [H[start], path]
+    visited = []
+    found_items = set()
+
+    while frontier:
+        i = 0
+        minindex = 0
+        while i < len(frontier):
+            if H[frontier[minindex + 1][-1]] > H[frontier[i + 1][-1]]:
+                minindex = i
+            i += 2
+
+        cost = frontier.pop(minindex)
+        path = frontier.pop(minindex)
+        expand = path[-1]
+
+        if expand not in visited:
+            visited.append(expand)
+            if expand in items_to_find:
+                found_items.add(expand)
+                print(f"Found item: {expand}")
+
+            if found_items == set(items_to_find):
+                print("All items collected!")
+                print("Final Path:", path)
+                print("Visited Nodes:", visited)
+                return path
+
+            for n in graph[expand]:
+                new = list(path)
+                new.append(n)
+                frontier.append(H[n])
+                frontier.append(new)
+
+    print("Some items were not found.")
+    return path
+
+# Items to retrieve
+items = ["Coke", "Papers", "Apple", "Water"]
+
+# Run the GBFS
+gbfs_multiple_items("Door", items)
