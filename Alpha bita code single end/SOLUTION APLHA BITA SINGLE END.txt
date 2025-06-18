@@ -1,0 +1,73 @@
+# Tree structure in dictionary
+tree = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F', 'G'],
+    'D': ['H', 'I'],
+    'E': ['J', 'K'],
+    'F': ['L', 'M'],
+    'G': ['N', 'O'],
+    'H': -1, 'I': 4, 'J': 2, 'K': 6, 'L': -3, 'M': 5, 'N': 0, 'O': 7
+}
+
+pruned_nodes = []   # Store pruned values
+optimal_path = []   # Store path to optimal value
+
+def alpha_beta(node, alpha, beta, maximizingPlayer, path):
+    if isinstance(tree[node], int):
+        return tree[node]
+
+    best = float('-inf') if maximizingPlayer else float('inf')
+    selected_child = None
+
+    for child in tree[node]:
+        val = alpha_beta(child, alpha, beta, not maximizingPlayer, path + [child])
+        
+        if maximizingPlayer:
+            if val > best:
+                best = val
+                selected_child = child
+            alpha = max(alpha, best)
+        else:
+            if val < best:
+                best = val
+                selected_child = child
+            beta = min(beta, best)
+
+        if beta <= alpha:
+            # Prune the remaining children
+            index = tree[node].index(child)
+            remaining = tree[node][index+1:]
+            pruned_nodes.extend(flatten_pruned(remaining))
+            break
+
+    if node == 'A':
+        optimal_path.append(node)
+        optimal_path.extend(trace_optimal_path('A', best))
+    return best
+
+def flatten_pruned(nodes):
+    result = []
+    for n in nodes:
+        if isinstance(tree[n], int):
+            result.append(tree[n])
+        else:
+            result.extend(flatten_pruned(tree[n]))
+    return result
+
+def trace_optimal_path(node, target_val):
+    """ Trace path to the leaf that gives target_val """
+    if isinstance(tree[node], int):
+        return [node] if tree[node] == target_val else []
+    for child in tree[node]:
+        path = trace_optimal_path(child, target_val)
+        if path:
+            return [child] + path
+    return []
+
+# Run the algorithm
+optimal_value = alpha_beta('A', float('-inf'), float('inf'), True, ['A'])
+
+print("✅ Optimal Value:", optimal_value)
+print("✅ Pruned Nodes:", pruned_nodes)
+print("✅ Optimal Path:", ' → '.join(optimal_path))

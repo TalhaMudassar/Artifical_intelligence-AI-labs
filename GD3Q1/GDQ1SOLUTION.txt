@@ -1,0 +1,60 @@
+tree = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F', 'G'],
+    'D': [2, 3],
+    'E': [5, 9],
+    'F': [0, 1],
+    'G': [7, 5]
+}
+
+pruned_nodes = []
+
+def alpha_beta(node, depth, alpha, beta, maximizingPlayer):
+    # Terminal node
+    if node not in tree:
+        return node
+
+    if maximizingPlayer:
+        maxEval = float('-inf')
+        for child in tree[node]:
+            eval = alpha_beta(child, depth+1, alpha, beta, False)
+            maxEval = max(maxEval, eval)
+            alpha = max(alpha, eval)
+            if beta <= alpha:
+                # Prune remaining children
+                index = tree[node].index(child)
+                remaining = tree[node][index+1:]
+                pruned_nodes.extend(flatten_leaves(remaining))
+                break
+        return maxEval
+    else:
+        minEval = float('inf')
+        for child in tree[node]:
+            eval = alpha_beta(child, depth+1, alpha, beta, True)
+            minEval = min(minEval, eval)
+            beta = min(beta, eval)
+            if beta <= alpha:
+                # Prune remaining children
+                index = tree[node].index(child)
+                remaining = tree[node][index+1:]
+                pruned_nodes.extend(flatten_leaves(remaining))
+                break
+        return minEval
+
+def flatten_leaves(nodes):
+    """ Flatten any subtrees to get the actual leaf values for pruning display """
+    leaves = []
+    for node in nodes:
+        if isinstance(node, int):  # already a leaf
+            leaves.append(node)
+        elif node in tree:
+            # Recursively collect leaves
+            leaves.extend(flatten_leaves(tree[node]))
+    return leaves
+
+# Run alpha-beta pruning
+optimal_value = alpha_beta('A', 0, float('-inf'), float('inf'), True)
+
+print(f"\nOptimal Value: {optimal_value}")
+print("Pruned Nodes:", pruned_nodes)

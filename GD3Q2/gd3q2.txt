@@ -1,0 +1,41 @@
+# STEP 1: IMPORT LIBRARIES
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score, f1_score
+
+# STEP 2: LOAD DATASET
+dataset = pd.read_csv("student.csv")
+
+# STEP 3: SEPARATE LABELS & FEATURES
+# Drop StudentID and separate GradeClass
+x = dataset.drop(columns=["StudentID", "GradeClass"])
+y = dataset["GradeClass"]
+
+# OPTIONAL: Convert non-numeric data to numeric if needed
+x = pd.get_dummies(x)
+
+# Standardize the data (Naive Bayes usually doesn't require it but helps with scaled features)
+scaler = StandardScaler()
+x_scaled = scaler.fit_transform(x)
+
+# STEP 4: DEFINE FUNCTION TO RUN EXPERIMENT
+def run_naive_bayes(test_size):
+    x_train, x_test, y_train, y_test = train_test_split(x_scaled, y, test_size=test_size, random_state=42)
+
+    model = GaussianNB()
+    model.fit(x_train, y_train)
+    
+    y_pred = model.predict(x_test)
+    
+    acc = accuracy_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred, average='weighted')  # assuming multiclass
+    print(f"\nTest Size = {test_size}")
+    print("Accuracy Score:", acc)
+    print("F1 Score:", f1)
+
+# STEP 5: RUN FOR DIFFERENT TEST SIZES
+for ts in [0.2, 0.35, 0.4]:
+    run_naive_bayes(ts)
